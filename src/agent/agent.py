@@ -5,6 +5,7 @@ from src.async_layer.executor import AsyncExecutor
 from src.ranking.ranker import Ranker
 from src.memory.memory import Memory
 from src.commerce.affiliate import Affiliate
+from src.vector.store import VectorStore
 
 class Agent:
     def __init__(self, tools, provider="openai"):
@@ -13,11 +14,15 @@ class Agent:
         self.executor = AsyncExecutor(tools)
         self.ranker = Ranker()
         self.memory = Memory()
+        self.vector = VectorStore()
         self.affiliate = Affiliate()
         self.tools = tools
 
     async def run(self, query):
         self.memory.update(query)
+
+        # semantic recall
+        past = self.vector.search(query)
 
         plan = self.planner.plan(query)
 
@@ -39,10 +44,17 @@ class Agent:
         )
 
         enriched = self.affiliate.run(ranked)
-
         final_products = [Product(**p) for p in enriched]
 
-        return AgentResponse(
+        output = AgentResponse(
             plan=plan,
             products=final_products
         )
+
+        # store memory
+        self.vector.add(query)
+
+        return {
+            "response": output.model_dump(),
+            "memory": past
+        }
