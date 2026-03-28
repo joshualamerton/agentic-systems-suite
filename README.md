@@ -1,32 +1,63 @@
 # Agentic Systems Suite
 
-A modular agentic commerce system.
+Production-grade agentic commerce system.
 
-This system:
-- Understands intent using LLMs (OpenAI / Gemini)
-- Plans multi-step actions
-- Queries multiple retailers (Shopify + Amazon)
-- Ranks results
-- Learns user preferences
-- Generates affiliate links
+## Features
+
+- Multi-LLM support (OpenAI + Gemini)
+- Multi-retailer (Shopify + Amazon-ready)
+- Async execution
+- Task planning
+- Ranking engine
+- User memory
+- Affiliate monetization
+- Typed models (Pydantic)
+- Docker-ready
 
 ---
 
 ## Architecture
 
-User Query → LLM → Planner → Async Execution → Retail APIs → Ranking → Memory → Affiliate Links
+User → LLM → Planner → Async Execution → Retail APIs → Ranking → Memory → Affiliate
 
 ---
 
-## Retail Support
+## Setup
 
-- Shopify (live API)
-- Amazon (placeholder, ready for PAAPI)
+pip install -r requirements.txt
 
 ---
 
 ## Run
 
-pip install -r requirements.txt
-
 python demos/demo.py
+
+---
+
+## Environment
+
+Create `.env`:
+
+OPENAI_API_KEY=xxx  
+GEMINI_API_KEY=xxx  
+
+SHOPIFY_STORE_URL=xxx  
+SHOPIFY_STOREFRONT_TOKEN=xxx  
+
+---
+
+## Production Ready
+
+- Locked dependencies  
+- Docker support  
+- Typed models  
+- Modular architecture  
+
+---
+
+## Roadmap
+
+- Amazon PAAPI (real)
+- Vector DB memory
+- FastAPI service
+- Image → product matching
