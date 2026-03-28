@@ -1,0 +1,7 @@
+openai
+google-generativeai
+faiss-cpu
+numpy
+requests
+aiohttp
+python-dotenv
