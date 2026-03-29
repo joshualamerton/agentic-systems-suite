@@ -18,43 +18,46 @@ class Agent:
         self.affiliate = Affiliate()
         self.tools = tools
 
-    async def run(self, query):
+    async def run(self, query: str):
+        # update user memory
         self.memory.update(query)
 
-        # semantic recall
-        past = self.vector.search(query)
+        # semantic recall (optional)
+        past_memory = self.vector.search(query)
 
+        # planning
         plan = self.planner.plan(query)
 
+        # 🔴 UPDATED TOOL EXECUTION (SHOPIFY + AMAZON PAAPI)
         tasks = [
             {"tool": "shopify", "params": {"query": query}},
-            {"tool": "amazon", "params": {"query": query}}
+            {"tool": "amazon_paapi", "params": {"query": query}}
         ]
 
         results = await self.executor.run_all(tasks)
 
+        # flatten product results
         products = []
         for r in results:
-            for p in r:
-                products.append(Product(**p))
+            if isinstance(r, list):
+                for p in r:
+                    products.append(Product(**p))
 
+        # ranking
         ranked = self.ranker.run(
             [p.model_dump() for p in products],
             self.memory.get()
         )
 
+        # affiliate links
         enriched = self.affiliate.run(ranked)
         final_products = [Product(**p) for p in enriched]
 
-        output = AgentResponse(
-            plan=plan,
-            products=final_products
-        )
-
-        # store memory
+        # store query in vector memory
         self.vector.add(query)
 
         return {
-            "response": output.model_dump(),
-            "memory": past
+            "plan": plan,
+            "products": final_products,
+            "memory": past_memory
         }
