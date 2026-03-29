@@ -9,3 +9,5 @@ class Config:
 
     SHOPIFY_STORE_URL = os.getenv("SHOPIFY_STORE_URL")
     SHOPIFY_STOREFRONT_TOKEN = os.getenv("SHOPIFY_STOREFRONT_TOKEN")
+
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
