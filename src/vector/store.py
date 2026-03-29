@@ -1,32 +1,25 @@
-import faiss
-import numpy as np
+from pinecone import Pinecone
 from openai import OpenAI
 from src.config import Config
+
+pc = Pinecone(api_key=Config.PINECONE_API_KEY)
+index = pc.Index("agentic-memory")
 
 client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 class VectorStore:
-    def __init__(self, dim=1536):
-        self.index = faiss.IndexFlatL2(dim)
-        self.data = []
-
     def embed(self, text):
         res = client.embeddings.create(
             model="text-embedding-3-small",
             input=text
         )
-        return np.array(res.data[0].embedding).astype("float32")
+        return res.data[0].embedding
 
     def add(self, text):
         vec = self.embed(text)
-        self.index.add(np.array([vec]))
-        self.data.append(text)
+        index.upsert([(text, vec)])
 
-    def search(self, query, k=3):
-        if len(self.data) == 0:
-            return []
-
-        q = self.embed(query)
-        _, idx = self.index.search(np.array([q]), k)
-
-        return [self.data[i] for i in idx[0] if i < len(self.data)]
+    def search(self, query):
+        vec = self.embed(query)
+        res = index.query(vector=vec, top_k=3, include_metadata=True)
+        return [m["id"] for m in res["matches"]]
